@@ -5,7 +5,11 @@ import com.santander.user.exceptions.UserNotFoundException;
 import com.santander.user.model.User;
 import com.santander.user.model.UserDTO;
 import com.santander.user.repository.UserRepository;
+import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+@Service
 public class UserService implements UserServiceInterface{
     final private UserRepository userRepository;
 
@@ -26,6 +30,7 @@ public class UserService implements UserServiceInterface{
         if(userRepository.findById(userID).isEmpty()){
             throw new UserNotFoundException();
         }
+        dto.setId(Optional.of(userID));
         return this.save(dto);
     }
 

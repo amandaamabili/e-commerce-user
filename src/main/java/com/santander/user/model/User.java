@@ -17,8 +17,9 @@ public class User {
     private String name;
     private String email;
 
-    public User(UserDTO userDTO){
-       this.name = userDTO.getName();
-       this.email = userDTO.getEmail();
+    public User(UserDTO userDTO) {
+        this.id = userDTO.getId().isPresent() ? userDTO.getId().get() : null;
+        this.name = userDTO.getName();
+        this.email = userDTO.getEmail();
     }
 }

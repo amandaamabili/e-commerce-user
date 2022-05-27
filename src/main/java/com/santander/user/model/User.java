@@ -13,12 +13,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class User {
 
     @Id
-    private String id;
+    private String _id;
     private String name;
     private String email;
 
     public User(UserDTO userDTO) {
-        this.id = userDTO.getId().isPresent() ? userDTO.getId().get() : null;
+        this._id = userDTO.getId().isPresent() ? userDTO.getId().get() : null;
         this.name = userDTO.getName();
         this.email = userDTO.getEmail();
     }

@@ -66,7 +66,7 @@ class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(currentUser);
 
         var service = new UserService(userRepository);
-        User update = service.update(previousUser.getId(), userDTO);
+        User update = service.update(previousUser.get_id(), userDTO);
 
         Assertions.assertNotNull(update);
         verify(userRepository).save(captor.capture());
@@ -91,7 +91,7 @@ class UserServiceTest {
                 });
 
         var service = new UserService(userRepository);
-        Assertions.assertThrows(UserEmailDuplicatedException.class, () -> service.update(previousUser.getId(), userDTO));
+        Assertions.assertThrows(UserEmailDuplicatedException.class, () -> service.update(previousUser.get_id(), userDTO));
 
         verify(userRepository, never()).save(any(User.class));
         verify(userRepository).findById("2231AS@12");

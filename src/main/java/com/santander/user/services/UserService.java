@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class UserService implements UserServiceInterface{
+public class UserService implements UserServiceInterface {
     final private UserRepository userRepository;
 
     public UserService(UserRepository userRepository) {
@@ -19,7 +19,7 @@ public class UserService implements UserServiceInterface{
 
     @Override
     public User save(UserDTO dto) {
-        if(userRepository.findByEmail(dto.getEmail()).size() > 0 ){
+        if (userRepository.findByEmail(dto.getEmail()).size() > 0) {
             throw new UserEmailDuplicatedException();
         }
         return userRepository.save(new User(dto));
@@ -27,7 +27,7 @@ public class UserService implements UserServiceInterface{
 
     @Override
     public User update(String userID, UserDTO dto) {
-        if(userRepository.findById(userID).isEmpty()){
+        if (userRepository.findById(userID).isEmpty()) {
             throw new UserNotFoundException();
         }
         dto.setId(Optional.of(userID));
@@ -36,11 +36,16 @@ public class UserService implements UserServiceInterface{
 
     @Override
     public void delete(String userID) {
-
+        Optional<User> user = userRepository.findById(userID);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException();
+        }
+        userRepository.delete(user.get());
     }
 
     @Override
     public User get(String userID) {
-        return null;
+        var user = userRepository.findById(userID);
+        return user.orElseThrow(UserNotFoundException::new);
     }
 }

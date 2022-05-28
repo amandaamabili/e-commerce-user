@@ -1,5 +1,6 @@
 package com.santander.user.controller;
 
+import com.santander.user.exceptions.UserNotFoundException;
 import com.santander.user.model.User;
 import com.santander.user.model.UserDTO;
 import com.santander.user.services.UserServiceInterface;
@@ -17,8 +18,22 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    User getById(@PathVariable String id) {
-        return userService.get(id);
+    ResponseEntity<User> getById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(userService.get(id));
+        } catch (UserNotFoundException userNotFoundException) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    ResponseEntity<Object> deleteById(@PathVariable String id) {
+        try {
+            userService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch (UserNotFoundException userNotFoundException) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

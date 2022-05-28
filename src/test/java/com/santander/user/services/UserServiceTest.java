@@ -1,6 +1,7 @@
 package com.santander.user.services;
 
 import com.santander.user.exceptions.UserEmailDuplicatedException;
+import com.santander.user.exceptions.UserNotFoundException;
 import com.santander.user.model.User;
 import com.santander.user.model.UserDTO;
 import com.santander.user.repository.UserRepository;
@@ -99,9 +100,59 @@ class UserServiceTest {
 
     @Test
     void delete() {
+        var userId = "12AS@32";
+        var user = new User(userId, "User", "user_email@gmail.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        doNothing().when(userRepository).delete(user);
+        UserService userService = new UserService(userRepository);
+
+        userService.delete(userId);
+
+        verify(userRepository).findById(userId);
+        verify(userRepository).delete(user);
     }
 
     @Test
+    void shouldThrownExceptionWhenUserToDeleteIsNotFound() {
+        var userId = "12AS@32";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        UserService userService = new UserService(userRepository);
+
+        Assertions.assertThrows(UserNotFoundException.class, () -> userService.delete(userId));
+
+        verify(userRepository).findById(userId);
+        verify(userRepository, never()).delete(any(User.class));
+    }
+
+
+    @Test
     void get() {
+        var userId = "12AS@32";
+        var user = new User(userId, "User", "user_email@gmail.com");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        UserService userService = new UserService(userRepository);
+
+        User response = userService.get(userId);
+
+        Assertions.assertEquals(user.get_id(), response.get_id());
+        Assertions.assertEquals(user.getName(), response.getName());
+        Assertions.assertEquals(user.getEmail(), response.getEmail());
+
+        verify(userRepository).findById(userId);
+    }
+
+    @Test
+    void shouldThrownExceptionWhenGetObjectNotFound() {
+        var userId = "12AS@32";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        UserService userService = new UserService(userRepository);
+
+        Assertions.assertThrows(UserNotFoundException.class, () -> userService.get(userId));
+
+        verify(userRepository).findById(userId);
     }
 }

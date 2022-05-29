@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  user-service:
+    build: .
+    restart: always
+    ports:
+      - "8080:8080"
+    networks:
+      - app-db-network
+    environment:
+      - spring.data.mongodb.host=mongo_db
+      - spring.data.mongodb.port=27017
+      - spring.data.mongodb.database=e-commerce
+    depends_on:
+      - mongo_db
+
+  mongo_db:
+    image: "mongo:latest"
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - app-db-network
+
+networks:
+  app-db-network:

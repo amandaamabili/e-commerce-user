@@ -1,5 +1,6 @@
 package com.santander.user.services;
 
+import com.santander.user.client.SaleClientAPI;
 import com.santander.user.exceptions.UserEmailDuplicatedException;
 import com.santander.user.exceptions.UserNotFoundException;
 import com.santander.user.model.User;
@@ -11,10 +12,13 @@ import java.util.Optional;
 
 @Service
 public class UserService implements UserServiceInterface {
-    final private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final SaleClientAPI saleAPIClient;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, SaleClientAPI saleAPIClient) {
+
         this.userRepository = userRepository;
+        this.saleAPIClient = saleAPIClient;
     }
 
     @Override
@@ -22,7 +26,9 @@ public class UserService implements UserServiceInterface {
         if (userRepository.findByEmail(dto.getEmail()).size() > 0) {
             throw new UserEmailDuplicatedException();
         }
-        return userRepository.save(new User(dto));
+        var user = userRepository.save(new User(dto));
+        saleAPIClient.createCart(user.get_id());
+        return user;
     }
 
     @Override
@@ -41,6 +47,7 @@ public class UserService implements UserServiceInterface {
             throw new UserNotFoundException();
         }
         userRepository.delete(user.get());
+        saleAPIClient.deleteCart(userID);
     }
 
     @Override

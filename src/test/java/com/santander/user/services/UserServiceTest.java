@@ -1,5 +1,6 @@
 package com.santander.user.services;
 
+import com.santander.user.client.SaleClientAPI;
 import com.santander.user.exceptions.UserEmailDuplicatedException;
 import com.santander.user.exceptions.UserNotFoundException;
 import com.santander.user.model.User;
@@ -24,14 +25,17 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private SaleClientAPI saleClientAPI;
 
     @Test
     void create() {
         User user = new User("2231AS@12", "User", "user@gmail.com");
 
         when(userRepository.save(any(User.class))).thenReturn(user);
+        doNothing().when(saleClientAPI).createCart(anyString());
 
-        var service = new UserService(userRepository);
+        var service = new UserService(userRepository, saleClientAPI);
         var userCreated = service.save(new UserDTO(Optional.empty(), "User", "user@gmail.com", "084084"));
         Assertions.assertEquals(user.getEmail(), userCreated.getEmail());
         Assertions.assertEquals(user.getName(), userCreated.getName());
@@ -43,6 +47,7 @@ class UserServiceTest {
         User user = new User("2231AS@12", "User", "user@gmail.com");
         List<User> userList = List.of(user);
 
+
         when(userRepository.findByEmail(any(String.class))).
                 thenAnswer(invocation -> {
                     String email = invocation.getArgument(0);
@@ -50,7 +55,7 @@ class UserServiceTest {
                             .filter(user1 -> Objects.equals(user1.getEmail(), email)).collect(Collectors.toList());
                 });
 
-        var service = new UserService(userRepository);
+        var service = new UserService(userRepository, saleClientAPI);
         Assertions.assertThrows(
                 UserEmailDuplicatedException.class,
                 () -> service.save(new UserDTO(Optional.empty(), "User", "user@gmail.com", "084084")));
@@ -66,7 +71,7 @@ class UserServiceTest {
         when(userRepository.findById("2231AS@12")).thenReturn(Optional.of(previousUser));
         when(userRepository.save(any(User.class))).thenReturn(currentUser);
 
-        var service = new UserService(userRepository);
+        var service = new UserService(userRepository, saleClientAPI);
         User update = service.update(previousUser.get_id(), userDTO);
 
         Assertions.assertNotNull(update);
@@ -91,7 +96,7 @@ class UserServiceTest {
                             .filter(user1 -> Objects.equals(user1.getEmail(), email)).collect(Collectors.toList());
                 });
 
-        var service = new UserService(userRepository);
+        var service = new UserService(userRepository, saleClientAPI);
         Assertions.assertThrows(UserEmailDuplicatedException.class, () -> service.update(previousUser.get_id(), userDTO));
 
         verify(userRepository, never()).save(any(User.class));
@@ -105,7 +110,8 @@ class UserServiceTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         doNothing().when(userRepository).delete(user);
-        UserService userService = new UserService(userRepository);
+
+        UserService userService = new UserService(userRepository, saleClientAPI);
 
         userService.delete(userId);
 
@@ -118,7 +124,8 @@ class UserServiceTest {
         var userId = "12AS@32";
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        UserService userService = new UserService(userRepository);
+
+        UserService userService = new UserService(userRepository, saleClientAPI);
 
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.delete(userId));
 
@@ -133,7 +140,8 @@ class UserServiceTest {
         var user = new User(userId, "User", "user_email@gmail.com");
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        UserService userService = new UserService(userRepository);
+
+        UserService userService = new UserService(userRepository, saleClientAPI);
 
         User response = userService.get(userId);
 
@@ -149,7 +157,8 @@ class UserServiceTest {
         var userId = "12AS@32";
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
-        UserService userService = new UserService(userRepository);
+
+        UserService userService = new UserService(userRepository, saleClientAPI);
 
         Assertions.assertThrows(UserNotFoundException.class, () -> userService.get(userId));
 

@@ -1,24 +1,29 @@
 version: "3.7"
 services:
   user-service:
-    build: .
+    container_name: e-commerce-user-app
+    image: amandaamabili/product-ecommerce-user:1.0
     restart: always
     ports:
-      - "8080:8080"
+      - "8001:8001"
     networks:
       - app-db-network
     environment:
-      - spring.data.mongodb.host=mongo_db
-      - spring.data.mongodb.port=27017
+      - spring.data.mongodb.host=mongo-user-db
+      - spring.data.mongodb.port=27018
       - spring.data.mongodb.database=e-commerce
+      - server.port=8001
+      - sale.base.url=http://e-commerce-sale-app:8002/sale
     depends_on:
-      - mongo_db
+      - mongo-user-db
 
-  mongo_db:
+  mongo-user-db:
+    container_name: e-commerce-user-app-db
     image: "mongo:latest"
     restart: always
+    command: mongod --port 27018
     ports:
-      - "27017:27017"
+      - "27018:27018"
     networks:
       - app-db-network
 
